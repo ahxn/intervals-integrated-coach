@@ -67,10 +67,10 @@ export default function ChatContent() {
                   <p className="text-sm">
                     {message.parts && Array.isArray(message.parts)
                       ? message.parts
-                          .filter((p: any) => p.type === 'text')
-                          .map((p: any) => p.text)
+                          .filter((p: { type: string }) => p.type === 'text')
+                          .map((p: { text?: string }) => p.text ?? '')
                           .join('')
-                      : message.content || ''}
+                      : ''}
                   </p>
                 </div>
               </div>
