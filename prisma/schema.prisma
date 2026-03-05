@@ -1,0 +1,138 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RaceType {
+  HALF
+  MARATHON
+  TEN_K
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum WorkoutType {
+  EASY
+  SUB_THRESHOLD
+  LONG
+  REST
+  OTHER
+}
+
+enum WorkoutSource {
+  AI
+  MANUAL
+}
+
+enum Soreness {
+  NONE
+  MILD
+  MODERATE
+  SEVERE
+}
+
+model User {
+  id             String            @id @default(cuid())
+  email          String            @unique
+  name           String?
+  passwordHash   String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  settings       UserSettings?
+  trainingStates TrainingStateDaily[]
+  plannedWorkouts PlannedWorkout[]
+  weekPlans      WeekPlan[]
+  feedbacks      Feedback[]
+}
+
+model UserSettings {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  raceDate            DateTime?
+  raceType            RaceType @default(HALF)
+  longRunDay          DayOfWeek @default(SUNDAY)
+  maxQualityDays      Int      @default(2)
+  maxSubThresholdDays Int      @default(3)
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model TrainingStateDaily {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date            DateTime @db.Date
+  ctl             Float?
+  atl             Float?
+  tsb             Float?
+  volume7d        Float?
+  volume14d       Float?
+  volume28d       Float?
+  lastLongRunDate DateTime? @db.Date
+  lastQualityDate DateTime? @db.Date
+  rawJson         Json?
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model PlannedWorkout {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date            DateTime      @db.Date
+  type            WorkoutType
+  durationMinutes Int
+  targets         Json
+  rationale       String?
+  alternates      Json?
+  source          WorkoutSource @default(AI)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model WeekPlan {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekStartDate DateTime @db.Date
+  planJson      Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, weekStartDate])
+  @@index([userId, weekStartDate])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  rpe       Int
+  soreness  Soreness @default(NONE)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
