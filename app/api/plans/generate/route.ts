@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateWeekPlan } from "@/lib/plan-generator"
 import { NextRequest, NextResponse } from "next/server"
+import { Prisma } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -81,12 +82,12 @@ export async function POST(request: NextRequest) {
         },
       },
       update: {
-        planJson: plan as unknown as Record<string, unknown>,
+        planJson: plan as Prisma.InputJsonValue,
       },
       create: {
         userId: session.user.id,
         weekStartDate: new Date(weekStartDate),
-        planJson: plan as unknown as Record<string, unknown>,
+        planJson: plan as Prisma.InputJsonValue,
       },
     })
 
@@ -102,9 +103,9 @@ export async function POST(request: NextRequest) {
         update: {
           type: day.type,
           durationMinutes: day.durationMinutes,
-          targets: day.targets as unknown as Record<string, unknown>,
+          targets: day.targets as Prisma.InputJsonValue,
           rationale: day.rationale,
-          alternates: day.alternates as unknown as Record<string, unknown> | undefined,
+          alternates: (day.alternates ?? undefined) as Prisma.InputJsonValue | undefined,
           source: "AI",
         },
         create: {
@@ -112,9 +113,9 @@ export async function POST(request: NextRequest) {
           date: new Date(day.date),
           type: day.type,
           durationMinutes: day.durationMinutes,
-          targets: day.targets as unknown as Record<string, unknown>,
+          targets: day.targets as Prisma.InputJsonValue,
           rationale: day.rationale,
-          alternates: day.alternates as unknown as Record<string, unknown> | undefined,
+          alternates: (day.alternates ?? undefined) as Prisma.InputJsonValue | undefined,
           source: "AI",
         },
       })
