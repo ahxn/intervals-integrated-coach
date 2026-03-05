@@ -1,5 +1,6 @@
-import { auth } from '@/lib/auth'
-import { streamText, convertToModelMessages } from 'ai'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { streamText, convertToModelMessages } from "ai"
 
 const coachSystemPrompt = `You are an expert running coach with 15+ years of experience. You help runners improve their performance, prevent injuries, and achieve their goals. 
 
@@ -14,19 +15,18 @@ When responding:
 Keep responses concise but helpful. Format lists with bullet points when appropriate.`
 
 export async function POST(request: Request) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
 
   if (!session) {
-    return new Response('Unauthorized', { status: 401 })
+    return new Response("Unauthorized", { status: 401 })
   }
 
   const { messages } = await request.json()
 
-  // Convert UIMessage format to ModelMessage format if needed
   const modelMessages = await convertToModelMessages(messages)
 
   const result = streamText({
-    model: 'openai/gpt-4o-mini',
+    model: "openai/gpt-4o-mini",
     system: coachSystemPrompt,
     messages: modelMessages,
   })

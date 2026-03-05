@@ -1,14 +1,14 @@
-import { hashPassword } from '@/lib/auth-utils'
-import { prisma } from '@/lib/prisma'
-import { NextRequest, NextResponse } from 'next/server'
+import { hashPassword } from "@/lib/auth-utils"
+import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { email, password, name } = await request.json()
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: "Email and password are required" },
         { status: 400 }
       )
     }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Email already registered' },
+        { error: "Email already registered" },
         { status: 400 }
       )
     }
@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         email,
-        password: hashedPassword,
+        name: name || null,
+        passwordHash: hashedPassword,
         settings: {
           create: {},
         },
@@ -38,13 +39,13 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(
-      { message: 'User created successfully', userId: user.id },
+      { message: "User created successfully", userId: user.id },
       { status: 201 }
     )
   } catch (error) {
-    console.error('Registration error:', error)
+    console.error("Registration error:", error)
     return NextResponse.json(
-      { error: 'An error occurred during registration' },
+      { error: "An error occurred during registration" },
       { status: 500 }
     )
   }

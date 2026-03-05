@@ -1,65 +1,59 @@
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {
     const today = new Date()
-    const weekStart = new Date(today)
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay())
 
     // Find current or most recent plan
     const plan = await prisma.weekPlan.findFirst({
       where: {
         userId: session.user.id,
-        weekStart: {
+        weekStartDate: {
           lte: today,
         },
       },
       orderBy: {
-        weekStart: 'desc',
-      },
-      include: {
-        workouts: true,
+        weekStartDate: "desc",
       },
     })
 
     if (!plan) {
       return NextResponse.json({
         id: null,
-        weekStart: weekStart.toISOString(),
+        weekStart: today.toISOString(),
         workouts: [],
       })
     }
 
-    // Extract workout details from each day
-    const workouts = plan.workouts.map((workout, index) => {
-      const workoutDate = new Date(plan.weekStart)
-      workoutDate.setDate(workoutDate.getDate() + index)
-
-      return {
-        date: workoutDate.toISOString(),
-        ...(typeof workout.workoutDetails === 'object'
-          ? workout.workoutDetails
-          : JSON.parse(workout.workoutDetails || '{}')),
-      }
-    })
+    // Extract workouts from planJson
+    const planData = plan.planJson as { days?: Array<{ date: string; type: string; durationMinutes: number; targets: unknown; rationale: string }> }
+    const workouts = (planData.days || []).map((day) => ({
+      date: day.date,
+      type: day.type,
+      name: day.type,
+      description: day.rationale || "",
+      duration: day.durationMinutes,
+      targets: day.targets,
+    }))
 
     return NextResponse.json({
       id: plan.id,
-      weekStart: plan.weekStart.toISOString(),
+      weekStart: plan.weekStartDate.toISOString(),
       workouts,
     })
   } catch (error) {
-    console.error('Error fetching current plan:', error)
+    console.error("Error fetching current plan:", error)
     return NextResponse.json(
-      { error: 'Failed to fetch plan' },
+      { error: "Failed to fetch plan" },
       { status: 500 }
     )
   }

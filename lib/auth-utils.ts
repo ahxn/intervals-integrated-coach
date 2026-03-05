@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import bcrypt from "bcryptjs"
 
 export async function getSession() {
   return getServerSession(authOptions)
@@ -16,4 +17,8 @@ export async function requireUserId(): Promise<string> {
     throw new Error("Unauthorized")
   }
   return userId
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12)
 }
