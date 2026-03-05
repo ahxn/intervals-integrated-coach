@@ -4,6 +4,18 @@ import { usePlan } from '@/hooks/use-workouts'
 import WorkoutCard from '@/components/workout-card'
 import PlanGeneratorButton from '@/components/plan-generator-button'
 
+type PlanWorkout = {
+  date: string
+  type: string
+  name: string
+  description: string
+  duration?: number
+  distance?: number
+  pace?: string
+  intensity?: string
+  targets?: unknown
+}
+
 export default function WeekContent() {
   const { plan, isLoading, isError, refresh } = usePlan()
 
@@ -27,7 +39,7 @@ export default function WeekContent() {
     <div className="space-y-6">
       {plan?.workouts && plan.workouts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {plan.workouts.map((workout, idx) => (
+          {plan.workouts.map((workout: PlanWorkout, idx: number) => (
             <div key={idx}>
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 {new Date(workout.date).toLocaleDateString('en-US', {
