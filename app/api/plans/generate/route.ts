@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateWeekPlan } from "@/lib/plan-generator"
 import { NextRequest, NextResponse } from "next/server"
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client"
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -82,12 +82,12 @@ export async function POST(request: NextRequest) {
         },
       },
       update: {
-        planJson: plan as Prisma.InputJsonValue,
+        planJson: plan as unknown as Prisma.InputJsonValue,
       },
       create: {
         userId: session.user.id,
         weekStartDate: new Date(weekStartDate),
-        planJson: plan as Prisma.InputJsonValue,
+        planJson: plan as unknown as Prisma.InputJsonValue,
       },
     })
 
@@ -103,9 +103,11 @@ export async function POST(request: NextRequest) {
         update: {
           type: day.type,
           durationMinutes: day.durationMinutes,
-          targets: day.targets as Prisma.InputJsonValue,
+          targets: day.targets as unknown as Prisma.InputJsonValue,
           rationale: day.rationale,
-          alternates: (day.alternates ?? undefined) as Prisma.InputJsonValue | undefined,
+          alternates: (day.alternates ?? undefined) as unknown as
+            | Prisma.InputJsonValue
+            | undefined,
           source: "AI",
         },
         create: {
@@ -113,9 +115,11 @@ export async function POST(request: NextRequest) {
           date: new Date(day.date),
           type: day.type,
           durationMinutes: day.durationMinutes,
-          targets: day.targets as Prisma.InputJsonValue,
+          targets: day.targets as unknown as Prisma.InputJsonValue,
           rationale: day.rationale,
-          alternates: (day.alternates ?? undefined) as Prisma.InputJsonValue | undefined,
+          alternates: (day.alternates ?? undefined) as unknown as
+            | Prisma.InputJsonValue
+            | undefined,
           source: "AI",
         },
       })
@@ -127,9 +131,6 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error("Plan generation error:", error)
-    return NextResponse.json(
-      { error: "Failed to generate plan" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to generate plan" }, { status: 500 })
   }
 }
