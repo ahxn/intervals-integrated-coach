@@ -22,7 +22,7 @@ export default function ChatContent() {
     }),
   })
 
-  const isLoading = status === 'streaming' || status === 'submitting'
+  const isLoading = status === 'submitted'
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
