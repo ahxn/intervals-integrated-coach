@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 
 interface UIMessageChunk {
   type: string
@@ -11,17 +11,26 @@ interface UIMessageChunk {
 }
 
 export default function ChatContent() {
+  const [input, setInput] = useState('')
   const {
     messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
+    sendMessage,
+    status,
   } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
   })
+
+  const isLoading = status === 'streaming' || status === 'submitting'
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const text = input.trim()
+    if (!text || isLoading) return
+    sendMessage({ text })
+    setInput('')
+  }
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -89,7 +98,7 @@ export default function ChatContent() {
         <div className="flex gap-3">
           <input
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             placeholder="Ask your coach something..."
             disabled={isLoading}
             className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
