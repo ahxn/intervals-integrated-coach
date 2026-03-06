@@ -56,6 +56,20 @@ model User {
   plannedWorkouts PlannedWorkout[]
   weekPlans      WeekPlan[]
   feedbacks      Feedback[]
+  chatUsage      ChatUsage[]
+}
+
+model ChatUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month     String   // "YYYY-MM"
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, month])
+  @@index([userId, month])
 }
 
 model UserSettings {

@@ -1,4 +1,5 @@
 import { generateText, Output } from "ai"
+import { google } from "@ai-sdk/google"
 import { z } from "zod"
 import type { DayPlan, TrainingState, WeekPlanSchema } from "@/types"
 import { validateWeekPlan, getFallbackPlan } from "@/lib/plan-validator"
@@ -116,7 +117,7 @@ export async function generateWeekPlan(
           : `The previous plan had constraint violations. Please regenerate with these fixes applied. Remember: max ${input.userSettings.maxQualityDays} quality days, no back-to-back quality, long run on ${input.userSettings.longRunDay}.`
 
       const result = await generateText({
-        model: "openai/gpt-4o-mini",
+        model: google("gemini-1.5-flash"),
         system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],
         output: Output.object({ schema: weekPlanOutputSchema }),
