@@ -45,52 +45,52 @@ enum Soreness {
 }
 
 model User {
-  id             String            @id @default(cuid())
-  email          String            @unique
-  name           String?
-  passwordHash   String
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  settings       UserSettings?
-  trainingStates TrainingStateDaily[]
+  id              String               @id @default(cuid())
+  email           String               @unique
+  name            String?
+  passwordHash    String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  settings        UserSettings?
+  trainingStates  TrainingStateDaily[]
   plannedWorkouts PlannedWorkout[]
-  weekPlans      WeekPlan[]
-  feedbacks      Feedback[]
-  chatUsage      ChatUsage[]
+  weekPlans       WeekPlan[]
+  feedbacks       Feedback[]
+  chatUsage       ChatUsage[]
 }
 
 model ChatUsage {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  month     String   // "YYYY-MM"
-  count     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id String @id @default(cuid())
 
-  @@unique([userId, month])
-  @@index([userId, month])
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  day   String
+  count Int    @default(0)
+
+  @@unique([userId, day], name: "userId_day")
+  @@index([userId, day])
 }
 
 model UserSettings {
-  id                  String   @id @default(cuid())
-  userId              String   @unique
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   raceDate            DateTime?
-  raceType            RaceType @default(HALF)
+  raceType            RaceType  @default(HALF)
   longRunDay          DayOfWeek @default(SUNDAY)
-  maxQualityDays      Int      @default(2)
-  maxSubThresholdDays Int      @default(3)
+  maxQualityDays      Int       @default(2)
+  maxSubThresholdDays Int       @default(3)
   notes               String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model TrainingStateDaily {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date            DateTime @db.Date
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date            DateTime  @db.Date
   ctl             Float?
   atl             Float?
   tsb             Float?
@@ -100,7 +100,7 @@ model TrainingStateDaily {
   lastLongRunDate DateTime? @db.Date
   lastQualityDate DateTime? @db.Date
   rawJson         Json?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
 
   @@unique([userId, date])
   @@index([userId, date])

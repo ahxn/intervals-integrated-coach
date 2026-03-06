@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return new Response(
       JSON.stringify({
         error: "Chat limit reached",
-        message: "You've used your 200 chat messages for this month. Limit resets next month.",
+        message: "You've used your 100 chat messages for today. Limit resets tomorrow.",
       }),
       { status: 429, headers: { "Content-Type": "application/json" } }
     )
